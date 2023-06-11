@@ -3,15 +3,15 @@ from flask_pymongo import pymongo
 from pymongo import MongoClient
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'e8fcde0f610b8dae6d41597851f7a44226fe306a'
-app.config['PERMANENT_SESSION_LIFETIME'] = 60  # session duration time (60s)
+app.config['PERMANENT_SESSION_LIFETIME'] = 60  # duração da sessão de login
 
-CONNECTION_STRING = 'mongodb+srv://caiomoretti:Ks8ZjNBAe3bZ7KpT@cluster0.zrn15mf.mongodb.net/?retryWrites=true'
+CONNECTION_STRING = 'mongodb atlas connection string'  # string do mongodb atlas com seu login
 client = pymongo.MongoClient(CONNECTION_STRING)
-db = client.get_database('usuarios_db')
-usuarios_collection = db.usuarios
+db = client.get_database('usuarios_db')  # database = usuarios_db
+usuarios_collection = db.usuarios  # collection = usuarios
 
 
+# depois de conectar corretamente ao banco de dados do mongodb atlas, o Flask toma conta do backend do site:
 @app.route('/')
 def home():
     return render_template('landing_page.html')
