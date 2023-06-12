@@ -1,17 +1,18 @@
 from flask import Flask, render_template, redirect, request, session
 from flask_pymongo import pymongo
 from pymongo import MongoClient
+from bson.objectid import ObjectId
+
 
 app = Flask(__name__)
-app.config['PERMANENT_SESSION_LIFETIME'] = 60  # duração da sessão de login
+app.config['PERMANENT_SESSION_LIFETIME'] = 60  # session duration time (60s)
 
-CONNECTION_STRING = 'mongodb atlas connection string'  # string do mongodb atlas com seu login
+CONNECTION_STRING = 'seu link copiado'
 client = pymongo.MongoClient(CONNECTION_STRING)
-db = client.get_database('usuarios_db')  # database = usuarios_db
-usuarios_collection = db.usuarios  # collection = usuarios
+db = client.get_database('seu database')
+usuarios_collection = db.sua-collection
 
 
-# depois de conectar corretamente ao banco de dados do mongodb atlas, o Flask toma conta do backend do site:
 @app.route('/')
 def home():
     return render_template('landing_page.html')
@@ -58,6 +59,34 @@ def admin():
     usuarios = usuarios_collection.find()
 
     return render_template('admin.html', usuarios=usuarios)
+
+
+@app.route('/edit/<string:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+
+        usuarios_collection.update_one({'_id': ObjectId(user_id)},
+                                       {'$set': {'nome': nome, 'email': email, 'senha': senha}})
+
+        return redirect('/admin')
+
+    usuario = usuarios_collection.find_one({'_id': ObjectId(user_id)})
+    return render_template('edit_user.html', usuario=usuario)
+
+
+@app.route('/delete/<string:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    usuarios_collection.delete_one({'_id': ObjectId(user_id)})
+    return redirect('/admin')
 
 
 if __name__ == "__main__":
